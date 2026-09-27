@@ -8,8 +8,8 @@ export interface CsrfHeader {
 export interface UploadedContent {
   /** Stable id of the persisted content row. */
   contentId: string;
-  /** Server status (e.g. "Active"). */
-  status: string;
+  /** Server status (e.g. "Active"); absent from the Dloizides.Content.Upload.AspNetCore proxy body. */
+  status?: string;
   /** Public download URL; present when the upload was public. */
   url?: string;
 }

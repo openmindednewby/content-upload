@@ -88,7 +88,7 @@ async function send(request: UploadRequest, options: UploadImageOptions): Promis
 
 /**
  * Upload one image as multipart/form-data (`File`, `Category`, `IsPublic`) to a
- * consumer-supplied endpoint and return the parsed `{ contentId, status, url }`.
+ * consumer-supplied endpoint and return the parsed `{ contentId, status?, url }`.
  *
  * Never sets Content-Type: the runtime adds the multipart boundary, and a JSON content type
  * on a FormData body is a 415 (see `@dloizides/bff-web-client` writeContentTypeGuard).

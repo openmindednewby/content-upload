@@ -19,12 +19,16 @@ export function parseUploadedContent(text: string, requireUrl: boolean): Uploade
   } catch {
     throw invalid('Upload response was not JSON.');
   }
-  if (!isRecord(payload) || typeof payload.contentId !== 'string' || typeof payload.status !== 'string') {
+  // `status` is optional: ContentService sends it, the Dloizides.Content.Upload.AspNetCore
+  // proxy (`ContentUploadResponse(ContentId, Url)`) does not. Present-but-not-a-string is still malformed.
+  const hasBadStatus = isRecord(payload) && payload.status !== undefined && typeof payload.status !== 'string';
+  if (!isRecord(payload) || typeof payload.contentId !== 'string' || hasBadStatus) {
     throw invalid('Upload response shape was invalid.');
   }
+  const status = typeof payload.status === 'string' ? payload.status : undefined;
   const url = typeof payload.url === 'string' && payload.url !== '' ? payload.url : undefined;
   if (requireUrl && url === undefined) {
     throw invalid('Upload response did not include a public URL.');
   }
-  return { contentId: payload.contentId, status: payload.status, url };
+  return { contentId: payload.contentId, status, url };
 }

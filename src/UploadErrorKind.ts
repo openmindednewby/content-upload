@@ -8,6 +8,6 @@ export const enum UploadErrorKind {
   Http = 'http',
   /** The caller aborted (AbortSignal / hook reset). */
   Aborted = 'aborted',
-  /** 2xx, but the body was not `{ contentId, status, url? }` (or lacked a required url). */
+  /** 2xx, but the body was not `{ contentId, status?, url? }` (or lacked a required url). */
   InvalidResponse = 'invalid-response',
 }

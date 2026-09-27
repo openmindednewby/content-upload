@@ -12,6 +12,11 @@ function kindOf(fn: () => unknown): UploadErrorKind | undefined {
 }
 
 describe('parseUploadedContent', () => {
+  it('accepts the Dloizides.Content.Upload.AspNetCore proxy body, which has no status (KEFI-PEOPLE-1)', () => {
+    // ContentUploadResponse(ContentId, Url): the organizer upload route returns 201 with only these two.
+    expect(parseUploadedContent('{"contentId":"a","url":"https://cdn/a.png"}', true)).toEqual({ contentId: 'a', url: 'https://cdn/a.png' });
+  });
+
   it('parses contentId, status and url', () => {
     expect(parseUploadedContent('{"contentId":"a","status":"Active","url":"u"}', true)).toEqual({ contentId: 'a', status: 'Active', url: 'u' });
   });

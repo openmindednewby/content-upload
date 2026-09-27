@@ -1,6 +1,6 @@
 {
   "name": "@dloizides/content-upload",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Framework-light image upload client for the dloizides.com ContentService (multipart POST through a same-origin BFF proxy, CSRF header, abort, optional progress) plus a useImageUpload React hook with idle/uploading/error/done states. The endpoint is supplied by the consumer.",
   "keywords": [
     "upload",

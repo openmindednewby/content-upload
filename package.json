@@ -1,0 +1,83 @@
+{
+  "name": "@dloizides/content-upload",
+  "version": "0.0.0",
+  "description": "Framework-light image upload client for the dloizides.com ContentService (multipart POST through a same-origin BFF proxy, CSRF header, abort, optional progress) plus a useImageUpload React hook with idle/uploading/error/done states. The endpoint is supplied by the consumer.",
+  "keywords": [
+    "upload",
+    "multipart",
+    "content",
+    "bff",
+    "react-hook",
+    "dloizides"
+  ],
+  "author": "dloizides",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openmindednewby/content-upload.git"
+  },
+  "homepage": "https://github.com/openmindednewby/content-upload#readme",
+  "bugs": {
+    "url": "https://github.com/openmindednewby/content-upload/issues"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsup",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "security:audit": "npm audit --audit-level=high",
+    "deps:outdated": "npm outdated || exit 0",
+    "deps:unused": "npx depcheck --ignores \"@types/jest,@types/node,@types/react,rimraf,react-dom,@testing-library/react,@testing-library/dom\"",
+    "deps:licenses": "npx license-checker --onlyAllow \"MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;Unlicense;CC0-1.0\"",
+    "prepublishOnly": "npm run clean && npm run build && npm run test"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.19.32",
+    "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-sonarjs": "^4.0.3",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rimraf": "^5.0.0",
+    "ts-jest": "^29.1.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}

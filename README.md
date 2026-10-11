@@ -40,6 +40,24 @@ uses `fetch`. `signal` aborts either.
 
 `blobFromUri(uri)` reads a `blob:` / `data:` / RN picker `file:` URI into a `Blob`.
 
+## Generic multipart upload with progress
+
+```ts
+import { uploadFormWithProgress, UploadError, UploadErrorKind } from '@dloizides/content-upload';
+
+const result = await uploadFormWithProgress<{ jobId: string }>({
+  url: '/bff/api/aml/admin/jobs/rupep/upload',
+  parts: { file },
+  headers: { 'X-BFF-Csrf': '1' },
+  onProgress: (pct) => setPct(pct),
+  signal: controller.signal,
+});
+```
+
+Cookies are sent by default (`withCredentials: false` to opt out). A Content-Type header is
+dropped. An `Http` failure carries `error.status` and the raw `error.body`; an empty 2xx body
+resolves `null`.
+
 ## Hook
 
 ```ts

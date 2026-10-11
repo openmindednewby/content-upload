@@ -21,8 +21,16 @@ function isOk(status: number): boolean {
   return status >= HTTP_OK_MIN && status < HTTP_OK_MAX_EXCLUSIVE;
 }
 
-function httpError(status: number): UploadError {
-  return new UploadError(UploadErrorKind.Http, `Upload failed (${String(status)}).`, status);
+function httpError(status: number, body: string): UploadError {
+  return new UploadError(UploadErrorKind.Http, `Upload failed (${String(status)}).`, status, body);
+}
+
+async function readBodySafely(response: Response): Promise<string> {
+  try {
+    return await response.text();
+  } catch {
+    return '';
+  }
 }
 
 function abortedError(): UploadError {
@@ -48,7 +56,7 @@ export async function sendWithFetch(request: UploadRequest, fetchImpl: typeof fe
     throw new UploadError(UploadErrorKind.Network, detail);
   }
   if (!isOk(response.status)) {
-    throw httpError(response.status);
+    throw httpError(response.status, await readBodySafely(response));
   }
   return response.text();
 }
@@ -77,7 +85,7 @@ export function sendWithXhr(
       if (isOk(xhr.status)) {
         resolve(xhr.responseText);
       } else {
-        reject(httpError(xhr.status));
+        reject(httpError(xhr.status, xhr.responseText));
       }
     });
     xhr.addEventListener('error', () => reject(new UploadError(UploadErrorKind.Network, 'Upload failed (network error).')));
@@ -88,4 +96,35 @@ export function sendWithXhr(
     Object.entries(request.headers).forEach(([name, value]) => xhr.setRequestHeader(name, value));
     xhr.send(request.form);
   });
+}
+
+/** Transport selection knobs shared by every upload entry point. */
+export interface TransportOptions {
+  /** When set (and no `fetchImpl`), the upload goes over XMLHttpRequest to report progress. */
+  onProgress?: ProgressListener;
+  /** Custom fetch (tests, SSR). Forces the fetch transport. */
+  fetchImpl?: typeof fetch;
+  /** Custom XMLHttpRequest factory (tests). */
+  xhrFactory?: () => XMLHttpRequest;
+}
+
+function resolveXhrFactory(options: TransportOptions): (() => XMLHttpRequest) | undefined {
+  if (options.fetchImpl !== undefined) {
+    return undefined;
+  }
+  if (options.xhrFactory !== undefined) {
+    return options.xhrFactory;
+  }
+  return typeof XMLHttpRequest === 'undefined' ? undefined : (): XMLHttpRequest => new XMLHttpRequest();
+}
+
+/** Send over XMLHttpRequest when progress is wanted and available, else over fetch. */
+export async function sendUploadRequest(request: UploadRequest, options: TransportOptions): Promise<string> {
+  const { onProgress } = options;
+  const createXhr = onProgress === undefined ? undefined : resolveXhrFactory(options);
+  if (createXhr !== undefined && onProgress !== undefined) {
+    return sendWithXhr(request, createXhr, onProgress);
+  }
+  const fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
+  return sendWithFetch(request, fetchImpl);
 }

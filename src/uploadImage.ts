@@ -1,5 +1,5 @@
 import { parseUploadedContent } from './parseUploadedContent';
-import { sendWithFetch, sendWithXhr } from './transports';
+import { sendUploadRequest } from './transports';
 import { UploadError } from './UploadError';
 import { UploadErrorKind } from './UploadErrorKind';
 
@@ -66,26 +66,6 @@ export function buildUploadRequest(file: Blob, options: UploadImageOptions): Upl
   };
 }
 
-function resolveXhrFactory(options: UploadImageOptions): (() => XMLHttpRequest) | undefined {
-  if (options.fetchImpl !== undefined) {
-    return undefined;
-  }
-  if (options.xhrFactory !== undefined) {
-    return options.xhrFactory;
-  }
-  return typeof XMLHttpRequest === 'undefined' ? undefined : (): XMLHttpRequest => new XMLHttpRequest();
-}
-
-async function send(request: UploadRequest, options: UploadImageOptions): Promise<string> {
-  const { onProgress } = options;
-  const createXhr = onProgress === undefined ? undefined : resolveXhrFactory(options);
-  if (createXhr !== undefined && onProgress !== undefined) {
-    return sendWithXhr(request, createXhr, onProgress);
-  }
-  const fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
-  return sendWithFetch(request, fetchImpl);
-}
-
 /**
  * Upload one image as multipart/form-data (`File`, `Category`, `IsPublic`) to a
  * consumer-supplied endpoint and return the parsed `{ contentId, status?, url }`.
@@ -98,6 +78,6 @@ async function send(request: UploadRequest, options: UploadImageOptions): Promis
 export async function uploadImage(file: Blob, options: UploadImageOptions): Promise<UploadedContent> {
   validate(file, options);
   const request = buildUploadRequest(file, options);
-  const text = await send(request, options);
+  const text = await sendUploadRequest(request, options);
   return parseUploadedContent(text, options.requireUrl ?? options.isPublic ?? true);
 }

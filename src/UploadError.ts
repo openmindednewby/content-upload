@@ -5,12 +5,15 @@ export class UploadError extends Error {
   readonly kind: UploadErrorKind;
   /** HTTP status for `UploadErrorKind.Http`; undefined otherwise. */
   readonly status: number | undefined;
+  /** Raw response body for `UploadErrorKind.Http`; undefined otherwise. */
+  readonly body: string | undefined;
 
-  constructor(kind: UploadErrorKind, message: string, status?: number) {
+  constructor(kind: UploadErrorKind, message: string, status?: number, body?: string) {
     super(message);
     this.name = 'UploadError';
     this.kind = kind;
     this.status = status;
+    this.body = body;
   }
 }
 

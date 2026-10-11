@@ -1,3 +1,5 @@
+import type { TransportOptions } from './transports';
+
 /** A header the BFF anti-forgery middleware requires on mutating requests. */
 export interface CsrfHeader {
   name: string;
@@ -18,7 +20,7 @@ export interface UploadedContent {
 export type ProgressListener = (percent: number) => void;
 
 /** Options for `uploadImage`. Only `endpoint` is required. */
-export interface UploadImageOptions {
+export interface UploadImageOptions extends TransportOptions {
   /** Same-origin URL of the upload endpoint, e.g. `/bff/api/content/api/v1/content/upload`. */
   endpoint: string;
   /** Filename sent with the file part. Defaults to `File.name`, else `"upload"`. */
@@ -39,13 +41,18 @@ export interface UploadImageOptions {
   allowedTypes?: readonly string[];
   /** Aborts the request; the promise rejects with `UploadErrorKind.Aborted`. */
   signal?: AbortSignal;
-  /**
-   * Progress listener. When set (and no `fetchImpl` is given) the upload goes over
-   * XMLHttpRequest, the only browser/RN transport that reports upload progress.
-   */
-  onProgress?: ProgressListener;
-  /** Custom fetch (tests, SSR). Forces the fetch transport. */
-  fetchImpl?: typeof fetch;
-  /** Custom XMLHttpRequest factory (tests). */
-  xhrFactory?: () => XMLHttpRequest;
+}
+
+/** Options for `uploadFormWithProgress`. Only `url` and `parts` are required. */
+export interface UploadFormOptions extends TransportOptions {
+  /** Upload endpoint, e.g. a same-origin BFF route. */
+  url: string;
+  /** Multipart fields in insertion order; a Blob/File becomes a file part. */
+  parts: Record<string, Blob | string>;
+  /** Extra headers (e.g. a CSRF header). Any Content-Type is dropped: the runtime sets the boundary. */
+  headers?: Record<string, string>;
+  /** Send cookies (BFF session). Default `true`. */
+  withCredentials?: boolean;
+  /** Aborts the request; the promise rejects with `UploadErrorKind.Aborted`. */
+  signal?: AbortSignal;
 }

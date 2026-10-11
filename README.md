@@ -79,3 +79,23 @@ await upload(file); // resolves to the content, or null on error / abort
 
 `npm run lint` · `npm run typecheck` · `npm run test:coverage` (100% threshold) · `npm run build`.
 Publish only via `./publish.ps1 -Bump <patch|minor|major>`.
+
+## Resumable upload (tus)
+
+```ts
+const id = await uploadResumable({
+  endpoint: '/bff/api/aml/v1/ingest/uploads',
+  file,
+  metadata: { part: 'persons' },
+  gzip: true,
+  headers: { 'X-BFF-Csrf': '1' },
+  onProgress: setPercent,
+  signal: controller.signal,
+});
+```
+
+- tus 1.0 via `tus-js-client`; 16 MiB chunks; cookies sent by default.
+- `gzip: true` streams through `CompressionStream` with deferred length (`encoding=gzip`); without
+  `CompressionStream` the file goes up uncompressed (`encoding=identity`). The server reads `encoding`.
+- Interrupted uploads resume from a stored fingerprint on the next call with the same file and metadata.
+- Aborting terminates the server-side upload.

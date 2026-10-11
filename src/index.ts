@@ -8,3 +8,7 @@ export { UploadStatus } from './UploadStatus';
 export type { CsrfHeader, ProgressListener, UploadFormOptions, UploadedContent, UploadImageOptions } from './types';
 export type { TransportOptions, UploadRequest } from './transports';
 export type { ImageUploadState, UseImageUploadOptions, UseImageUploadResult } from './useImageUpload';
+export { uploadResumable, buildTusOptions, buildResumableMetadata, resumeFingerprint, DEFAULT_RESUMABLE_CHUNK_SIZE } from './uploadResumable';
+export { UploadEncoding } from './UploadEncoding';
+export type { ResumableUploadOptions, TusUpload, TusUploadFactory } from './resumableTypes';
+export type { ByteReader } from './resumableSource';

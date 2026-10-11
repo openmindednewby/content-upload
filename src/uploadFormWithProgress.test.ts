@@ -111,3 +111,14 @@ describe('uploadFormWithProgress', () => {
     expect((await caught(promise)).kind).toBe(UploadErrorKind.Aborted);
   });
 });
+
+describe('sendWithFetch', () => {
+  it('with an error status whose body cannot be read, rejects with Http and an empty body', async () => {
+    const response = { status: 500, text: () => Promise.reject(new Error('stream')) } as unknown as Response;
+    const fetchImpl = jest.fn(() => Promise.resolve(response));
+
+    const error = await caught(uploadFormWithProgress({ url: URL, parts: {}, fetchImpl }));
+
+    expect([error.kind, error.status, error.body]).toEqual([UploadErrorKind.Http, 500, '']);
+  });
+});

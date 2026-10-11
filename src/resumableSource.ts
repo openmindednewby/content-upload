@@ -24,11 +24,28 @@ function identitySource(file: Blob): ResumableSource {
   return { input: file, encoding: UploadEncoding.Identity, lengthDeferred: false, sourceBytesRead: () => 0 };
 }
 
-/** Gzip the file as a stream when asked and supported; otherwise upload it as-is (identity). */
-export function openResumableSource(file: Blob, gzip: boolean, runtime: StreamRuntime = globalThis): ResumableSource {
+interface GzipStreams {
+  Compression: typeof CompressionStream;
+  Transform: typeof TransformStream;
+}
+
+function gzipStreams(gzip: boolean, runtime: StreamRuntime): GzipStreams | undefined {
   const Compression = runtime.CompressionStream;
   const Transform = runtime.TransformStream;
-  if (!gzip || Compression === undefined || Transform === undefined) {return identitySource(file);}
+  if (!gzip || Compression === undefined || Transform === undefined) {return undefined;}
+  return { Compression, Transform };
+}
+
+/** True when an interrupted upload can resume after a page reload: identity only, never a gzip stream. */
+export function isResumableAcrossReload(gzip = false, runtime: StreamRuntime = globalThis): boolean {
+  return gzipStreams(gzip, runtime) === undefined;
+}
+
+/** Gzip the file as a stream when asked and supported; otherwise upload it as-is (identity). */
+export function openResumableSource(file: Blob, gzip: boolean, runtime: StreamRuntime = globalThis): ResumableSource {
+  const streams = gzipStreams(gzip, runtime);
+  if (streams === undefined) {return identitySource(file);}
+  const { Compression, Transform } = streams;
   let read = 0;
   const counter = new Transform<Uint8Array<ArrayBuffer>, Uint8Array<ArrayBuffer>>({
     transform(chunk, controller): void {

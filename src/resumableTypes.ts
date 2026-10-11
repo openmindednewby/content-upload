@@ -21,7 +21,7 @@ export interface ResumableUploadOptions {
   file: Blob;
   /** tus Upload-Metadata; `filename` defaults to `File.name`; `encoding` is always set by the client. */
   metadata?: Record<string, string>;
-  /** Gzip the file as a stream (deferred length); falls back to identity when `CompressionStream` is missing. */
+  /** Gzip as a stream (deferred length; no resume after reload); identity when `CompressionStream` is missing. */
   gzip?: boolean;
   /** PATCH body size in bytes. Default 16 MiB (under the BFF 30 MB body limit). */
   chunkSize?: number;

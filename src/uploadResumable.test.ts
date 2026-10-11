@@ -238,6 +238,15 @@ describe('uploadResumable', () => {
     expect([options.onBeforeRequest, options.chunkSize]).toEqual([undefined, 1024]);
   });
 
+  it('with an identity source, stores the fingerprint for resuming after a reload', async () => {
+    const fake = new FakeUpload();
+
+    void start(fake);
+
+    const options = await started(fake);
+    expect([options.storeFingerprintForResuming, options.removeFingerprintOnSuccess]).toEqual([true, true]);
+  });
+
   it('with a fingerprint request, resolves the stable resume key', async () => {
     const fake = new FakeUpload();
     void start(fake);

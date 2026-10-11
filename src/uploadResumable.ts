@@ -56,7 +56,7 @@ export function buildTusOptions(options: ResumableUploadOptions, source: Resumab
     headers: { ...options.headers },
     uploadLengthDeferred: source.lengthDeferred,
     fingerprint: () => Promise.resolve(fingerprint),
-    storeFingerprintForResuming: true,
+    storeFingerprintForResuming: !source.lengthDeferred,
     removeFingerprintOnSuccess: true,
     onBeforeRequest: options.withCredentials === false ? undefined : sendCookies,
     ...callbacks,
@@ -84,9 +84,11 @@ export function newestPreviousUpload(previous: PreviousUpload[]): PreviousUpload
   return [...previous].sort((a, b) => b.creationTime.localeCompare(a.creationTime))[0];
 }
 
-async function startOrResume(upload: TusUpload): Promise<void> {
-  const previous = newestPreviousUpload(await upload.findPreviousUploads());
-  if (previous !== undefined) {upload.resumeFromPreviousUpload(previous);}
+async function startOrResume(upload: TusUpload, source: ResumableSource): Promise<void> {
+  if (!source.lengthDeferred) {
+    const previous = newestPreviousUpload(await upload.findPreviousUploads());
+    if (previous !== undefined) {upload.resumeFromPreviousUpload(previous);}
+  }
   upload.start();
 }
 
@@ -94,7 +96,7 @@ function abortedError(): UploadError {
   return new UploadError(UploadErrorKind.Aborted, 'Upload was cancelled.');
 }
 
-/** tus 1.0 resumable upload (16 MiB chunks, optional streamed gzip, fingerprint resume); resolves the upload id. */
+/** tus 1.0 upload (16 MiB chunks, optional streamed gzip); identity resumes across reloads, gzip only in-session. */
 export function uploadResumable(options: ResumableUploadOptions): Promise<string> {
   if (options.signal?.aborted === true) {return Promise.reject(abortedError());}
   const source = openResumableSource(options.file, options.gzip === true);
@@ -117,6 +119,6 @@ export function uploadResumable(options: ResumableUploadOptions): Promise<string
       upload.abort(true).catch(() => undefined);
     }
     options.signal?.addEventListener('abort', onAbort, { once: true });
-    startOrResume(upload).catch((error: unknown) => settle(() => reject(toUploadError(error))));
+    startOrResume(upload, source).catch((error: unknown) => settle(() => reject(toUploadError(error))));
   });
 }

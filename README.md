@@ -97,5 +97,7 @@ const id = await uploadResumable({
 - tus 1.0 via `tus-js-client`; 16 MiB chunks; cookies sent by default.
 - `gzip: true` streams through `CompressionStream` with deferred length (`encoding=gzip`); without
   `CompressionStream` the file goes up uncompressed (`encoding=identity`). The server reads `encoding`.
-- Interrupted uploads resume from a stored fingerprint on the next call with the same file and metadata.
+- Identity uploads interrupted by a reload resume from a stored fingerprint on the next call with the same
+  file and metadata. Gzip uploads do not (re-compressed bytes are not guaranteed identical); they retry failed
+  chunks in-session only. `isResumableAcrossReload(gzip)` tells a UI which applies.
 - Aborting terminates the server-side upload.

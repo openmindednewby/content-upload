@@ -3,7 +3,7 @@ import { CompressionStream, TransformStream } from 'node:stream/web';
 import { gunzipSync } from 'node:zlib';
 
 import { UploadEncoding } from './UploadEncoding';
-import { openResumableSource, resumablePercent } from './resumableSource';
+import { isResumableAcrossReload, openResumableSource, resumablePercent } from './resumableSource';
 
 import type { ByteReader, StreamRuntime } from './resumableSource';
 
@@ -75,5 +75,25 @@ describe('resumablePercent', () => {
     const percent = resumablePercent(source, 500, 10, 0);
 
     expect(percent).toBe(25);
+  });
+});
+
+describe('isResumableAcrossReload', () => {
+  it('with gzip on a runtime with CompressionStream, returns false', () => {
+    const result = isResumableAcrossReload(true, nodeRuntime);
+
+    expect(result).toBe(false);
+  });
+
+  it('with gzip on a runtime without CompressionStream, returns true', () => {
+    const result = isResumableAcrossReload(true, {});
+
+    expect(result).toBe(true);
+  });
+
+  it('with no arguments, returns true for an identity upload', () => {
+    const result = isResumableAcrossReload();
+
+    expect(result).toBe(true);
   });
 });

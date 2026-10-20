@@ -55,7 +55,7 @@
     "security:audit": "npm audit --audit-level=high",
     "deps:outdated": "npm outdated || exit 0",
     "deps:unused": "npx depcheck --ignores \"@types/jest,@types/node,@types/react,rimraf,react-dom,@testing-library/react,@testing-library/dom\"",
-    "deps:licenses": "npx license-checker --onlyAllow \"MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;Unlicense;CC0-1.0\"",
+    "deps:licenses": "npx license-checker --production --onlyAllow \"MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;Unlicense;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Python-2.0;BlueOak-1.0.0\" && npx license-checker --development --onlyAllow \"MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;Unlicense;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Python-2.0;BlueOak-1.0.0;LGPL-3.0;LGPL-3.0-only;LGPL-3.0-or-later\"",
     "prepublishOnly": "npm run clean && npm run build && npm run test"
   },
   "peerDependencies": {

@@ -46,6 +46,20 @@ function sendCookies(request: HttpRequest): void {
 }
 
 /** The tus-js-client options for one upload. Exported so consumers can pin the request shape. */
+const HTTP_CLIENT_ERROR = 400;
+const HTTP_SERVER_ERROR = 500;
+const RETRYABLE_CLIENT_STATUSES: readonly number[] = [409, 423];
+
+/** A tus `onShouldRetry` keeping the tus rule (retry unless a 4xx other than 409/423) that reports each retry. */
+export function retryAndNotify(onRetry: () => void): (error: Error) => boolean {
+  return (error) => {
+    const status = (error as { originalResponse?: TusResponse | null }).originalResponse?.getStatus() ?? 0;
+    const retry = status < HTTP_CLIENT_ERROR || status >= HTTP_SERVER_ERROR || RETRYABLE_CLIENT_STATUSES.includes(status);
+    if (retry) {onRetry();}
+    return retry;
+  };
+}
+
 export function buildTusOptions(options: ResumableUploadOptions, source: ResumableSource, callbacks: UploadCallbacks): UploadOptions {
   const metadata = buildResumableMetadata(options.file, options.metadata, source.encoding);
   const fingerprint = resumeFingerprint(options.endpoint, options.file, metadata);
@@ -59,6 +73,7 @@ export function buildTusOptions(options: ResumableUploadOptions, source: Resumab
     storeFingerprintForResuming: !source.lengthDeferred,
     removeFingerprintOnSuccess: true,
     onBeforeRequest: options.withCredentials === false ? undefined : sendCookies,
+    onShouldRetry: options.onRetry === undefined ? undefined : retryAndNotify(options.onRetry),
     ...callbacks,
   };
 }

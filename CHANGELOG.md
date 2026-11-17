@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0
+
+- `uploadResumable` takes `onRetry`: called each time tus retries a failed request, so a UI can say an
+  interrupted upload resumed. The retry rule is unchanged (retry unless a 4xx other than 409/423).
+
 ## 1.2.1
 
 RUPEP-5 "Upload the RuPEP file from the Jobs tab" -- review fix: no cross-reload resume for gzip.

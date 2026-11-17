@@ -30,6 +30,8 @@ export interface ResumableUploadOptions {
   /** Send cookies (BFF session). Default `true`. */
   withCredentials?: boolean;
   onProgress?: ProgressListener;
+  /** Called each time tus retries a failed request, before the retry. */
+  onRetry?: () => void;
   /** Aborts and terminates the upload; the promise rejects with `UploadErrorKind.Aborted`. */
   signal?: AbortSignal;
   uploadFactory?: TusUploadFactory;
